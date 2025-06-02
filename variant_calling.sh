@@ -16,7 +16,7 @@
 #mkdir data/genomes
 #mkdir results/sam
 #mkdir results/bam
-
+mkdir  results/bcf results/vcf
 
 
 # Load all the required modules here
@@ -26,7 +26,8 @@ module load BWA/0.7.18-GCCcore-13.3.0
 # Load Sam 
 module load SAMtools/1.18-GCC-12.3.0 
 
-
+# Load bcftools
+module load BCFtools/1.18-GCC-12.3.0 
 
 # Index the complete genome of E. coli
 # bwa is one of the indexing tool
@@ -35,29 +36,40 @@ module load SAMtools/1.18-GCC-12.3.0
 #Once indexing is done, allignment needs to be done
 
 # Loop over various paired reads only and allign the reads to the reference genome
-#for fwd in data/trimmed_fastq/*_1.paired.fastq.gz
-#do
-#sample=$(basename $fwd _1.paired.fastq.gz) 
+for fwd in data/trimmed_fastq/*_1.paired.fastq.gz
+do
+sample=$(basename $fwd _1.paired.fastq.gz) 
 
-#rev="data/trimmed_fastq/${sample}_2.paired.fastq.gz"
+rev="data/trimmed_fastq/${sample}_2.paired.fastq.gz"
 
 #echo $sample
 #echo $fwd
 #echo $rev
-
+echo "processing sample $sample"
 # Alignment step with the bwa module
 #bwa mem data/genomes/ecoli_rel606.fna "$fwd" "$rev" > results/sam/${sample}.sam
 
-#done
-
 # Convert SAM files to BAM files
-#samtools view -S -b results/sam/$sample.sam > results/bam/$sample.bam
+samtools view -S -b results/sam/$sample.sam > results/bam/$sample.bam
 
 
 # Sorting the bam files for indexing and visualization
 
-samtools sort results/bam/SRR2589044.bam -o results/bam/SRR2589044.sorted.bam
+samtools sort results/bam/${sample}.bam -o results/bam/${sample}.sorted.bam
 
 # Indexing the sorted BAM files
-samtools index results/bam/SRR2589044.sorted.bam
+samtools index results/bam/${sample}.sorted.bam
 
+
+# Variant calling: Generate bcf
+bcftools mpileup -O b -o results/bcf/${sample}.bcf -f data/genomes/ecoli_rel606.fna results/bam/${sample}.sorted.bam
+
+
+#Variant calling: Generate vcf file
+bcftools call --ploidy 1 -m -v -o results/vcf/${sample}.vcf results/bcf/${sample}.bcf
+
+echo "Finishing processing sample : $sample"
+
+done
+
+echo "All samples successfully porcessed"
