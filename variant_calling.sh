@@ -9,15 +9,46 @@
 
 #To download the genome from the above url
 #wget -O data/genomes/ecoli_rel606.fna.gz $genome_url
-gunzip data/genomes/ecoli_rel606.fna.gz
+#gunzip data/genomes/ecoli_rel606.fna.gz
 
 
 # Make all the required directories here
 #mkdir data/genomes
-
+#mkdir results/sam
+#mkdir results/bam
 
 
 
 # Load all the required modules here
+#Load BWA
+module load BWA/0.7.18-GCCcore-13.3.0
+
+# Load Sam 
+module load SAMtools/1.18-GCC-12.3.0 
 
 
+
+# Index the complete genome of E. coli
+# bwa is one of the indexing tool
+#bwa index data/genomes/ecoli_rel606.fna
+
+#Once indexing is done, allignment needs to be done
+
+# Loop over various paired reads only and allign the reads to the reference genome
+for fwd in data/trimmed_fastq/*_1.paired.fastq.gz
+do
+sample=$(basename $fwd _1.paired.fastq.gz) 
+
+rev="data/trimmed_fastq/${sample}_2.paired.fastq.gz"
+
+echo $sample
+echo $fwd
+echo $rev
+
+# Alignment step with the bwa module
+#bwa mem data/genomes/ecoli_rel606.fna "$fwd" "$rev" > results/sam/${sample}.sam
+
+done
+
+# Convert SAM files to BAM files
+samtools view -S -b results/sam/$sample.sam > results/bam/$sample.bam
