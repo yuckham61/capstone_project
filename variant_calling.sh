@@ -35,20 +35,29 @@ module load SAMtools/1.18-GCC-12.3.0
 #Once indexing is done, allignment needs to be done
 
 # Loop over various paired reads only and allign the reads to the reference genome
-for fwd in data/trimmed_fastq/*_1.paired.fastq.gz
-do
-sample=$(basename $fwd _1.paired.fastq.gz) 
+#for fwd in data/trimmed_fastq/*_1.paired.fastq.gz
+#do
+#sample=$(basename $fwd _1.paired.fastq.gz) 
 
-rev="data/trimmed_fastq/${sample}_2.paired.fastq.gz"
+#rev="data/trimmed_fastq/${sample}_2.paired.fastq.gz"
 
-echo $sample
-echo $fwd
-echo $rev
+#echo $sample
+#echo $fwd
+#echo $rev
 
 # Alignment step with the bwa module
 #bwa mem data/genomes/ecoli_rel606.fna "$fwd" "$rev" > results/sam/${sample}.sam
 
-done
+#done
 
 # Convert SAM files to BAM files
-samtools view -S -b results/sam/$sample.sam > results/bam/$sample.bam
+#samtools view -S -b results/sam/$sample.sam > results/bam/$sample.bam
+
+
+# Sorting the bam files for indexing and visualization
+
+samtools sort results/bam/SRR2589044.bam -o results/bam/SRR2589044.sorted.bam
+
+# Indexing the sorted BAM files
+samtools index results/bam/SRR2589044.sorted.bam
+
