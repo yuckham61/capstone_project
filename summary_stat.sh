@@ -23,13 +23,15 @@
 
 #To count alligned reads from the sorted bam files
 #module load SAMtools/1.18-GCC-12.3.0
-
+module load BCFtools/1.18-GCC-12.3.0
 #echo -e "sample\taligned_reads" > aligned_counts.tsv
 
 #for bam in results/bam/*.sorted.bam
 #do
 #echo $bam
  # reads=$(samtools view -F 0x4 "$bam" | wc -l) #samtools view... filters out unmapped reads and counts only rads that aligned to the genome
+
+# samtools view -F 0x4 excludes reads that are flagged as unmapped. The -F option tells samtools to exclude reads with a given flag, in this case , 0x4 means "reads is unmapped"
   #echo -e "$bam\taligned\t$reads" >> summary_stats.tsv
 #done
 
@@ -37,4 +39,6 @@
 for vcf in results/vcf/*.vcf
 do
 echo $vcf
+variants=$(bcftools view -H "$vcf" | wc -l)  # Count variant records, excluding header lines
+echo -e "$vcf\tvariants\t$variants" >> summary_stats.tsv
 done
