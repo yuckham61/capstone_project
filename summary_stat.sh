@@ -42,3 +42,6 @@ echo $vcf
 variants=$(bcftools view -H "$vcf" | wc -l)  # Count variant records, excluding header lines
 echo -e "$vcf\tvariants\t$variants" >> summary_stats.tsv
 done
+
+
+# This is a done setp
